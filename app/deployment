@@ -53,5 +53,5 @@ spec:  # Спецификация Deployment
           httpGet:  # Также HTTP проверка
             path: /health  # Тот же эндпоинт
             port: 8080  # Тот же порт
-          initialDelaySeconds: 15  # Больше времени на первый старт
-          periodSeconds: 10  # Проверять реже чем readiness
+          initialDelaySeconds: 15  # Ожидание
+          periodSeconds: 10  # Интервал
