@@ -1,0 +1,57 @@
+apiVersion: apps/v1  # Используем API версии apps/v1 для Deployment
+kind: Deployment  # Тип ресурса - Deployment (управляет набором подов)
+metadata:  # Блок метаданных ресурса
+  name: web-app  # Имя Deployment будет использоваться для ссылок в других ресурсах
+  labels:  # Метки для селекторов и фильтрации
+    app: web-app  # Основная метка приложения
+spec:  # Спецификация Deployment
+  replicas: 4  # Количество реплик (подов) которые должны работать постоянно
+  strategy:  # Стратегия обновления подов
+    type: RollingUpdate  # Постепенное обновление подов (по одному)
+    rollingUpdate:  # Настройки rolling update
+      maxSurge: 1  # Максимум на 1 под больше желаемого количества во время обновления
+      maxUnavailable: 1  # Допускаем 1 недоступный под во время обновления
+  selector:  # Селектор для определения какие поды принадлежат этому Deployment
+    matchLabels:  # Совпадение по меткам
+      app: web-app  # Должны совпадать поды с этой меткой
+  template:  # Шаблон для создания новых подов
+    metadata:  # Метаданные для создаваемых подов
+      labels:  # Метки подов
+        app: web-app  # Такая же метка как в селекторе
+    spec:  # Спецификация пода
+      affinity:  # Правила распределения подов по нодам
+        podAntiAffinity:  # Предпочтительно размещать поды на разных нодах
+          preferredDuringSchedulingIgnoredDuringExecution:  # "Мягкое" правило (предпочтение)
+          - weight: 100  # Вес правила (максимальный приоритет)
+            podAffinityTerm:  # Условия анти-аффинити
+              labelSelector:  # Селектор подов для правила
+                matchExpressions:  # Условия отбора по меткам
+                - key: app  # Имя метки
+                  operator: In  # Оператор "входит в"
+                  values:  # Значения метки
+                  - web-app  # Наше приложение
+              topologyKey: "kubernetes.io/hostname"  # Размещать на разных нодах (по hostname)
+      containers:  # Список контейнеров в поде
+      - name: app  # Имя контейнера
+        image: mindbox-registry/web-app:latest  # Образ контейнера
+        ports:  # Публикуемые порты
+        - containerPort: 8080  # Порт который слушает приложение
+        resources:  # Ограничения и запросы ресурсов
+          requests:  # Гарантированные ресурсы
+            cpu: "200m"  # 0.2 CPU гарантировано (200 millicores)
+            memory: "128Mi"  # 128 Мегабайт памяти гарантировано
+          limits:  # Максимальные ресурсы
+            cpu: "500m"  # Не более 0.5 CPU (ограничение всплесков)
+            memory: "128Mi"  # Жесткий лимит памяти (ровное потребление)
+        readinessProbe:  # Проверка готовности пода принимать трафик
+          httpGet:  # Проверка HTTP запросом
+            path: /health  # URL для проверки
+            port: 8080  # Порт для проверки
+          initialDelaySeconds: 10  # Ждать 10 сек перед первой проверкой (медленный старт)
+          periodSeconds: 5  # Интервал между проверками
+        livenessProbe:  # Проверка что приложение живо
+          httpGet:  # Также HTTP проверка
+            path: /health  # Тот же эндпоинт
+            port: 8080  # Тот же порт
+          initialDelaySeconds: 15  # Больше времени на первый старт
+          periodSeconds: 10  # Проверять реже чем readiness
