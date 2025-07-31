@@ -1,0 +1,10 @@
+apiVersion: v1  # API версия для Service
+kind: Service  # Тип ресурса - Service
+metadata:  # Метаданные
+  name: web-app-service  # Имя сервиса
+spec:  # Спецификация
+  selector:  # Селектор подов которые входят в сервис
+    app: web-app  # Те же поды что и в Deployment
+  ports:  # Публикуемые порты
+  - port: 80  # Внешний порт сервиса
+    targetPort: 8080  # Порт контейнера куда перенаправлять
