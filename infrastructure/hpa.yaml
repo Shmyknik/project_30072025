@@ -1,0 +1,18 @@
+apiVersion: autoscaling/v2  # API для горизонтального автомасштабирования
+kind: HorizontalPodAutoscaler  # Тип ресурса - автомасштабировщик
+metadata:  # Метаданные
+  name: web-app-hpa  # Имя HPA ресурса
+spec:  # Спецификация
+  scaleTargetRef:  # Цель для масштабирования
+    apiVersion: apps/v1  # API версия цели
+    kind: Deployment  # Тип цели - Deployment
+    name: web-app  # Имя Deployment который будем масштабировать
+  minReplicas: 2  # Минимальное количество подов (ночная нагрузка)
+  maxReplicas: 4  # Максимальное количество (пиковая нагрузка)
+  metrics:  # Метрики для масштабирования
+  - type: Resource  # Тип метрики - ресурсы
+    resource:  # Ресурсная метрика
+      name: cpu  # Масштабировать по CPU
+      target:  # Целевое значение
+        type: Utilization  # Процент использования
+        averageUtilization: 60  # Поддерживать ~60% загрузки CPU
