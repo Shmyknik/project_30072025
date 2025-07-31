@@ -49,9 +49,9 @@ spec:  # Спецификация Deployment
             port: 8080  # Порт для проверки
           initialDelaySeconds: 10  # Ждать 10 сек перед первой проверкой (медленный старт)
           periodSeconds: 5  # Интервал между проверками
-        livenessProbe:  # Проверка что приложение живо
-          httpGet:  # Также HTTP проверка
-            path: /health  # Тот же эндпоинт
-            port: 8080  # Тот же порт
+        livenessProbe:  # Проверка приложения
+          httpGet:  # HTTP проверка
+            path: /health  # хелсчек
+            port: 8080  # порт
           initialDelaySeconds: 15  # Ожидание
           periodSeconds: 10  # Интервал
